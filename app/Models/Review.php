@@ -19,8 +19,10 @@ class Review extends Model
         return $this->belongsTo(Book::class);
     }
 
-    public function likesBy()
+    public function likedByUsers()
     {
         return $this->belongsToMany(User::class, 'review_likes');
     }
+
+    protected $fillable = ['user_id', 'book_id', 'rating', 'comment'];
 }

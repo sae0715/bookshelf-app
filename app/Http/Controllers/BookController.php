@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\BookRequest;
 use App\Models\Genre;
+use Illuminate\Support\Facades\Gate;
 
 class BookController extends Controller
 {
@@ -46,7 +47,7 @@ class BookController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        $book->genres()->sync($request->genre_ids);
+        $book->genres()->sync($request->genres);
 
         return redirect()->route('books.show', $book)->with('success', '書籍を登録しました。');
     }
@@ -56,7 +57,9 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        //
+        $book->load(['genres', 'reviews.user', 'reviews.likedByUsers']);
+
+        return view('books.show', compact('book'));
     }
 
     /**
@@ -64,15 +67,34 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        //
+        Gate::authorize('update', $book);
+
+        $genres = Genre::all();
+
+        return view('books.edit', compact('book', 'genres'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Book $book)
+    public function update(BookRequest $request, Book $book)
     {
-        //
+        Gate::authorize('update', $book);
+
+        $validated = $request->validated();
+
+        $book->update([
+            'title' => $validated['title'],
+            'author' => $validated['author'],
+            'isbn' => $validated['isbn'],
+            'published_date' => $validated['published_date'],
+            'description' => $validated['description'] ?? null,
+            'image_url' => $validated['image_url'] ?? null,
+        ]);
+
+        $book->genres()->sync($request->genres);
+
+        return redirect()->route('books.show', $book)->with('success', '書籍情報を更新しました。');
     }
 
     /**
@@ -80,6 +102,10 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
-        //
+        Gate::authorize('delete', $book);
+
+        $book->delete();
+
+        return redirect()->route('books.index')->with('success', '書籍を削除しました。');
     }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('review_id')->constrained()->cascadeOnDelete();
-            $table->timestamp('created_at');
+            $table->timestamp('created_at')->useCurrent();
             $table->unique(['user_id', 'review_id']);
         });
     }
