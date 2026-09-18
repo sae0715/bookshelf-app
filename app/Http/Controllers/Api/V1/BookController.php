@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Http\Requests\BookRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use App\Http\Resources\BookResource;
 
 class BookController extends Controller
 {
@@ -26,14 +27,16 @@ class BookController extends Controller
             $query->whereHas('genres', fn($q) => $q->where('genres.id', $request->genre_id));
         }
 
-        return response()->json($query->paginate(20));
+        return BookResource::collection($query->paginate(20));
     }
 
     public function show(Book $book)
     {
         $book->load(['genres', 'reviews.user']);
+        $book->loadCount('reviews');
+        $book->loadAvg('reviews', 'rating');
 
-        return response()->json($book);
+        return new BookResource($book);
     }
 
     public function store(BookRequest $request)
