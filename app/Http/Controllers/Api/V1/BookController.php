@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Http\Requests\BookRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class BookController extends Controller
 {
@@ -48,6 +49,8 @@ class BookController extends Controller
 
     public function update(BookRequest $request, Book $book)
     {
+        Gate::authorize('update', $book);
+
         $book->update($request->validated());
         $book->genres()->sync($request->genres);
 
@@ -56,6 +59,8 @@ class BookController extends Controller
 
     public function destroy(Book $book)
     {
+        Gate::authorize('delete', $book);
+
         $book->delete();
 
         return response()->json(null, 204);

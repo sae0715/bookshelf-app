@@ -39,10 +39,10 @@ class BookApiTest extends TestCase
 
     public function test_書籍を登録できる(): void
     {
-        \App\Models\User::factory()->create();
+        $user = \App\Models\User::factory()->create();
         $genre = \App\Models\Genre::factory()->create();
 
-        $response = $this->postJson('/api/v1/books', [
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/books', [
             'title' => 'API書籍',
             'author' => 'API著者',
             'isbn' => '9999999999999',
@@ -56,16 +56,19 @@ class BookApiTest extends TestCase
 
     public function test_バリデーションエラー時422が返る(): void
     {
-        $response = $this->postJson('/api/v1/books', []);
+        $user = \App\Models\User::factory()->create();
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/books', []);
 
         $response->assertStatus(422);
     }
 
     public function test_書籍を削除できる(): void
     {
-        $book = Book::factory()->create();
+        $user = \App\Models\User::factory()->create();
+        $book = Book::factory()->create(['user_id' => $user->id]);
 
-        $response = $this->deleteJson("/api/v1/books/{$book->id}");
+        $response = $this->actingAs($user, 'sanctum')->deleteJson("/api/v1/books/{$book->id}");
 
         $response->assertStatus(204);
         $this->assertDatabaseMissing('books', ['id' => $book->id]);

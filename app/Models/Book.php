@@ -29,5 +29,10 @@ class Book extends Model
         return $this->belongsToMany(Genre::class);
     }
 
+    public function readingPlans()
+    {
+        return $this->hasMany(ReadingPlan::class);
+    }
+
     protected $fillable = ['title', 'author', 'isbn', 'published_date', 'description', 'image_url', 'user_id'];
 }
