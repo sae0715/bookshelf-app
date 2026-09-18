@@ -26,6 +26,4 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('books', BookController::class)->only(['index', 'show']);
 
-Route::get('/ranking', fn() => 'ランキング機能は準備中です')->name('ranking.index');
-
 Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
