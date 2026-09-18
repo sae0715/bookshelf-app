@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\Book;
+use App\Http\Requests\Api\V1\BookStoreRequest;
 use App\Http\Requests\BookRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\BookResource;
+use App\Models\Book;
+use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
@@ -24,7 +24,7 @@ class BookController extends Controller
         }
 
         if ($request->filled('genre_id')) {
-            $query->whereHas('genres', fn($q) => $q->where('genres.id', $request->genre_id));
+            $query->whereHas('genres', fn ($q) => $q->where('genres.id', $request->genre_id));
         }
 
         return BookResource::collection($query->paginate(20));
@@ -39,20 +39,28 @@ class BookController extends Controller
         return new BookResource($book);
     }
 
-    public function store(BookRequest $request)
+    public function store(BookStoreRequest $request)
     {
-        $data = $request->validated();
-        $data['user_id'] = \App\Models\User::first()->id;
+        $validated = $request->validated();
 
-        $book = Book::create($data);
+        $book = Book::create([
+            'title' => $validated['title'],
+            'author' => $validated['author'],
+            'isbn' => $validated['isbn'],
+            'published_date' => $validated['published_date'],
+            'description' => $validated['description'] ?? null,
+            'image_url' => $validated['image_url'] ?? null,
+            'user_id' => $validated['user_id'],
+        ]);
+
         $book->genres()->sync($request->genres);
 
-        return response()->json($book, 201);
+        return new BookResource($book);
     }
 
     public function update(BookRequest $request, Book $book)
     {
-        Gate::authorize('update', $book);
+        $this->authorize('update', $book);
 
         $book->update($request->validated());
         $book->genres()->sync($request->genres);
@@ -62,7 +70,7 @@ class BookController extends Controller
 
     public function destroy(Book $book)
     {
-        Gate::authorize('delete', $book);
+        $this->authorize('delete', $book);
 
         $book->delete();
 

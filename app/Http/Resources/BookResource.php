@@ -17,7 +17,7 @@ class BookResource extends JsonResource
             'published_date' => $this->published_date,
             'description' => $this->description,
             'image_url' => $this->image_url,
-            'genres' => $this->genres->map(fn($genre) => [
+            'genres' => $this->genres->map(fn ($genre) => [
                 'id' => $genre->id,
                 'name' => $genre->name,
             ]),
@@ -25,7 +25,7 @@ class BookResource extends JsonResource
                 ? round((float) $this->reviews_avg_rating, 1)
                 : null,
             'reviews_count' => $this->reviews_count,
-            'reviews' => $this->whenLoaded('reviews', fn() => $this->reviews->map(fn($review) => [
+            'reviews' => $this->whenLoaded('reviews', fn () => $this->reviews->map(fn ($review) => [
                 'id' => $review->id,
                 'user_name' => $review->user->name,
                 'rating' => $review->rating,

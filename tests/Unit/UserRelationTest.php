@@ -20,7 +20,7 @@ class UserRelationTest extends TestCase
         $this->assertTrue($user->books->contains($book));
     }
 
-    public function test_userはfavoriteBooksを取得できる(): void
+    public function test_userはfavorite_booksを取得できる(): void
     {
         $user = User::factory()->create();
         $book = Book::factory()->create();
@@ -37,7 +37,7 @@ class UserRelationTest extends TestCase
         $this->assertTrue($user->reviews->contains($review));
     }
 
-    public function test_userはlikedReviewsを取得できる(): void
+    public function test_userはliked_reviewsを取得できる(): void
     {
         $user = User::factory()->create();
         $review = Review::factory()->create();

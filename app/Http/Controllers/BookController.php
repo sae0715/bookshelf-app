@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BookRequest;
 use App\Models\Book;
+use App\Models\Genre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\BookRequest;
-use App\Models\Genre;
-use Illuminate\Support\Facades\Gate;
 
 class BookController extends Controller
 {
@@ -27,7 +26,7 @@ class BookController extends Controller
         }
 
         if ($request->filled('genre_id')) {
-            $query->whereHas('genres', fn($q) => $q->where('genres.id', $request->genre_id));
+            $query->whereHas('genres', fn ($q) => $q->where('genres.id', $request->genre_id));
         }
 
         match ($request->input('sort', 'latest')) {
@@ -89,7 +88,7 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        Gate::authorize('update', $book);
+        $this->authorize('update', $book);
 
         $genres = Genre::all();
 
@@ -101,7 +100,7 @@ class BookController extends Controller
      */
     public function update(BookRequest $request, Book $book)
     {
-        Gate::authorize('update', $book);
+        $this->authorize('update', $book);
 
         $validated = $request->validated();
 
@@ -124,7 +123,7 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
-        Gate::authorize('delete', $book);
+        $this->authorize('delete', $book);
 
         $book->delete();
 

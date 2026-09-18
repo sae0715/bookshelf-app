@@ -1,21 +1,28 @@
 <?php
 
-namespace Database\Factories;
+namespace App\Models;
 
-use App\Models\Book;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Enums\ReadingPlanStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class ReadingPlanFactory extends Factory
+class ReadingPlan extends Model
 {
-    public function definition(): array
+    use HasFactory;
+
+    protected $fillable = ['user_id', 'book_id', 'status', 'target_date', 'completed_at'];
+
+    protected $casts = [
+        'status' => ReadingPlanStatus::class,
+    ];
+
+    public function user()
     {
-        return [
-            'user_id' => User::factory(),
-            'book_id' => Book::factory(),
-            'status' => 'reading',
-            'target_date' => $this->faker->dateTimeBetween('now', '+2 months'),
-            'completed_at' => null,
-        ];
+        return $this->belongsTo(User::class);
+    }
+
+    public function book()
+    {
+        return $this->belongsTo(Book::class);
     }
 }

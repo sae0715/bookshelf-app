@@ -21,7 +21,7 @@ class ReviewLikeSeeder extends Seeder
         $reviews = Review::whereIn('user_id', $users->pluck('id'))->get();
 
         foreach ($reviews as $review) {
-            $likerCandidates = $users->reject(fn($user) => $user->id === $review->user_id);
+            $likerCandidates = $users->reject(fn ($user) => $user->id === $review->user_id);
 
             $likeCount = rand(0, 3);
             $likeCount = min($likeCount, $likerCandidates->count());
