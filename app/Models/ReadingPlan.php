@@ -14,6 +14,8 @@ class ReadingPlan extends Model
 
     protected $casts = [
         'status' => ReadingPlanStatus::class,
+        'target_date' => 'date',
+        'completed_at' => 'datetime',
     ];
 
     public function user()

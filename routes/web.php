@@ -3,10 +3,13 @@
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\IsbnSearchController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\ReadingPlanController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\IsbnSearchController;
 
 Route::get('/', [BookController::class, 'index'])->name('home');
 
@@ -26,9 +29,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('/favorites/{book}', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
-    Route::get('/reading-plans', fn() => '読書計画機能は準備中です')->name('reading-plans.index');
-    Route::get('/reports', fn() => 'レポート機能は準備中です')->name('reports.index');
-    Route::get('/notifications', fn() => '通知機能は準備中です')->name('notifications.index');
+    Route::post('/reading-plans/{reading_plan}/complete', [ReadingPlanController::class, 'complete'])->name('reading-plans.complete');
+    Route::post('/reading-plans/{reading_plan}/uncomplete', [ReadingPlanController::class, 'uncomplete'])->name('reading-plans.uncomplete');
+    Route::resource('reading-plans', ReadingPlanController::class)->except(['show']);
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
 Route::resource('books', BookController::class)->only(['index', 'show']);

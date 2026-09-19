@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 
@@ -18,7 +19,7 @@ class IsbnSearchController extends Controller
                 'q' => "isbn:{$isbn}",
                 'key' => config('services.google_books.key'),
             ]);
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+        } catch (ConnectionException $e) {
             return response()->json(['error' => 'API通信エラーが発生しました。'], 500);
         }
 
