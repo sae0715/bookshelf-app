@@ -53,7 +53,7 @@ class ReportController extends Controller
             ->groupBy('rating')
             ->pluck('count', 'rating');
 
-        return collect(range(1, 5))->map(fn ($rating) => $counts->get($rating, 0));
+        return collect(range(1, 5))->map(fn($rating) => $counts->get($rating, 0));
     }
 
     /**
@@ -71,7 +71,7 @@ class ReportController extends Controller
 
         $books = Book::whereIn('id', $topRatings->pluck('book_id'))->get()->keyBy('id');
 
-        return $topRatings->map(fn ($row) => [
+        return $topRatings->map(fn($row) => [
             'id' => $row->book_id,
             'title' => $books[$row->book_id]->title,
             'author' => $books[$row->book_id]->author,
@@ -85,7 +85,7 @@ class ReportController extends Controller
      */
     private function buildGenreRatings(int $userId): Collection
     {
-        return DB::table('reviews')
+        return Review::query()
             ->join('books', 'books.id', '=', 'reviews.book_id')
             ->join('book_genre', 'book_genre.book_id', '=', 'books.id')
             ->join('genres', 'genres.id', '=', 'book_genre.genre_id')
@@ -100,7 +100,7 @@ class ReportController extends Controller
             ->orderByDesc('average_rating')
             ->limit(5)
             ->get()
-            ->map(fn ($row) => [
+            ->map(fn($row) => [
                 'id' => $row->id,
                 'name' => $row->name,
                 'average_rating' => (float) $row->average_rating,
