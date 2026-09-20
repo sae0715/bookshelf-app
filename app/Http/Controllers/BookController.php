@@ -25,8 +25,8 @@ class BookController extends Controller
             });
         }
 
-        if ($request->filled('genre_id')) {
-            $query->whereHas('genres', fn ($q) => $q->where('genres.id', $request->genre_id));
+        if ($request->filled('genre')) {
+            $query->whereHas('genres', fn ($q) => $q->where('genres.id', $request->genre));
         }
 
         match ($request->input('sort', 'latest')) {
@@ -37,8 +37,9 @@ class BookController extends Controller
         };
 
         $books = $query->paginate(10)->withQueryString();
+        $genres = Genre::all();
 
-        return view('books.index', compact('books'));
+        return view('books.index', compact('books', 'genres'));
     }
 
     /**
