@@ -314,5 +314,4 @@ sail artisan test
 ```
 
 ## 作成者
-
 稲嶺 紗絵子
