@@ -8,6 +8,8 @@
 
 ### 実装した機能
 
+#### 基本機能
+
 - 会員登録・ログイン・ログアウト（Laravel Fortify）
 - 書籍のCRUD（登録・一覧・詳細・編集・削除）
 - キーワード検索・ジャンル絞り込み・並び替え（新着順／古い順／タイトル順／評価順）
@@ -17,7 +19,18 @@
 - レビュー平均評価によるランキング表示（TOP10）
 - 認可制御（本人以外は書籍・レビューの編集/削除不可、403を返す）
 - 公開API（書籍の一覧・詳細取得は認証不要、登録・更新・削除はSanctumトークン認証が必須）
-- 単体テスト・機能テスト 計43本
+
+#### 応用機能
+
+- **ISBN検索**：13桁のISBNを入力すると、Google Books APIから書籍情報（タイトル・著者・出版日・説明・画像）を取得してフォームに自動入力
+- **読書計画**：書籍ごとに「進行中／完了／期限切れ」のステータスで読書計画を管理
+  - 1ユーザー・1書籍につき「進行中」の計画は1件までに制限（重複制御）
+  - 「完了」になった計画は編集不可（削除・読了の取り消しのみ可能）。「期限切れ」の計画は編集・読了操作を継続可能
+  - 誤って「読了」にした場合の取り消し機能
+- **マイ読書レポート**：総レビュー数・読了冊数（レビュー投稿済みのユニーク書籍数）・平均評価などの基本サマリー、評価分布、高評価書籍TOP5、ジャンル別評価傾向TOP5を集計表示
+- **通知バッチ**：読書計画の期日3日前・当日・期限切れ3日後にリマインダー通知（Laravel Notification）、期日を過ぎた計画の自動失効を、毎日20:00の日次バッチ（Schedule + Console Command）で実行
+
+単体テスト・機能テスト 計78本
 
 ## ER図
 
@@ -31,6 +44,9 @@ erDiagram
     books ||--o{ favorites : "お気に入りされる"
     books }o--o{ genres : "book_genre"
     reviews ||--o{ review_likes : "いいねされる"
+    users ||--o{ reading_plans : "計画する"
+    books ||--o{ reading_plans : "計画される"
+    users ||--o{ notifications : "通知を受け取る"
 
     users {
         bigint id PK
@@ -74,6 +90,23 @@ erDiagram
         bigint id PK
         bigint user_id FK
         bigint review_id FK
+    }
+
+    reading_plans {
+        bigint id PK
+        bigint user_id FK
+        bigint book_id FK
+        string status
+        date target_date
+        timestamp completed_at
+    }
+    notifications {
+        uuid id PK
+        string type
+        string notifiable_type
+        bigint notifiable_id
+        text data
+        timestamp read_at
     }
 ```
 
@@ -134,6 +167,14 @@ DB_DATABASE=laravel
 DB_USERNAME=sail
 DB_PASSWORD=password
 ```
+
+また、ISBN検索機能（応用機能）はGoogle Books APIを利用します。`.env`に以下を追加してください。
+
+​```
+GOOGLE_BOOKS_API_KEY=
+​```
+
+APIキーが未設定でも1日1,000件まではキー無しで動作しますが、クォータを超過した場合はエラーメッセージの案内に従い、[Google Cloud Console](https://console.cloud.google.com/)でBooks APIを有効化して取得したキーを設定してください。
 
 ### ステップ3：Composerの依存パッケージをインストールする
 
@@ -255,6 +296,16 @@ sail npm run dev
 | POST | /api/v1/books | 書籍新規登録 | 必須（Sanctum） |
 | PUT | /api/v1/books/{id} | 書籍更新（本人以外は403） | 必須（Sanctum） |
 | DELETE | /api/v1/books/{id} | 書籍削除（本人以外は403） | 必須（Sanctum） |
+
+## 読書計画の日次バッチ
+
+読書計画のリマインダー通知（期日3日前・当日・期限切れ3日後）と自動失効は、毎日20:00に実行される日次バッチで処理されます（`app/Console/Kernel.php`にスケジュール登録済み）。
+
+ローカル環境で動作確認したい場合は、以下のコマンドで手動実行できます。
+
+```bash
+sail artisan reading-plans:process
+```
 
 ## テスト実行方法
 
