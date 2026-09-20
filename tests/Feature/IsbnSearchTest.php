@@ -12,7 +12,7 @@ class IsbnSearchTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_13桁以外のISBNはバリデーションエラーになる(): void
+    public function test_13桁以外の_isb_nはバリデーションエラーになる(): void
     {
         $user = User::factory()->create();
 
@@ -22,7 +22,7 @@ class IsbnSearchTest extends TestCase
         $response->assertJson(['error' => 'ISBNは13桁で入力してください。']);
     }
 
-    public function test_ISBN検索で書籍情報が取得できる(): void
+    public function test_isb_n検索で書籍情報が取得できる(): void
     {
         $user = User::factory()->create();
         Http::fake([
@@ -79,7 +79,7 @@ class IsbnSearchTest extends TestCase
         $response->assertJson(['error' => 'Google Books API のクォータを超過しました。.env に GOOGLE_BOOKS_API_KEY を設定してください。']);
     }
 
-    public function test_API通信エラー時は500が返る(): void
+    public function test_ap_i通信エラー時は500が返る(): void
     {
         $user = User::factory()->create();
         Http::fake(function () {
@@ -92,7 +92,7 @@ class IsbnSearchTest extends TestCase
         $response->assertJson(['error' => 'API通信エラーが発生しました。']);
     }
 
-    public function test_ゲストはISBN検索にアクセスするとログイン画面にリダイレクトされる(): void
+    public function test_ゲストは_isb_n検索にアクセスするとログイン画面にリダイレクトされる(): void
     {
         $response = $this->get('/books/isbn/9784101010014');
 

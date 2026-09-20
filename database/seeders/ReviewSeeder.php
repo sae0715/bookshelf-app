@@ -19,12 +19,12 @@ class ReviewSeeder extends Seeder
             'takahashi@example.com',
         ])->get();
 
-        $comments = [
-            'とても勉強になりました。おすすめです。',
-            '期待していた内容で満足しています。',
-            '読みやすく、内容も充実していました。',
-            '少し難しい部分もありましたが、学びが多かったです。',
-            '何度も読み返したくなる一冊でした。',
+        $commentsByRating = [
+            1 => 'あまり自分には合いませんでした。',
+            2 => '期待していた内容とは少し違いました。',
+            3 => '普通に読める内容でした。',
+            4 => '読みやすく、内容も充実していました。',
+            5 => 'とても勉強になりました。おすすめです。',
         ];
 
         $isbns = ['9784101010014', '9784422100524', '9784873115658', '9784863940246', '9784101010021', '9784309226712', '9784048930598', '9784478025819', '9784163902302', '9784822289607', '9784822251468'];
@@ -35,11 +35,13 @@ class ReviewSeeder extends Seeder
             $reviewers = $users->random($reviewerCount);
 
             foreach ($reviewers as $user) {
+                $rating = rand(1, 5);
+
                 Review::create([
                     'user_id' => $user->id,
                     'book_id' => $book->id,
-                    'rating' => rand(3, 5),
-                    'comment' => $comments[array_rand($comments)],
+                    'rating' => $rating,
+                    'comment' => $commentsByRating[$rating],
                 ]);
             }
         }

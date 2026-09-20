@@ -65,7 +65,11 @@ class BookController extends Controller
         $book->update($request->validated());
         $book->genres()->sync($request->genres);
 
-        return response()->json($book, 200);
+        $book->load('genres');
+        $book->loadCount('reviews');
+        $book->loadAvg('reviews', 'rating');
+
+        return new BookResource($book);
     }
 
     public function destroy(Book $book)

@@ -76,4 +76,21 @@ class BookApiTest extends TestCase
         $response->assertStatus(204);
         $this->assertDatabaseMissing('books', ['id' => $book->id]);
     }
+
+    public function test_本人以外が書籍を更新しようとすると日本語メッセージ付きで403が返る(): void
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $book = Book::factory()->create(['user_id' => $owner->id]);
+        $genre = Genre::factory()->create();
+
+        $response = $this->actingAs($otherUser, 'sanctum')->putJson("/api/v1/books/{$book->id}", [
+            'title' => '書き換えテスト',
+            'author' => '書き換えテスト著者',
+            'genres' => [$genre->id],
+        ]);
+
+        $response->assertStatus(403);
+        $response->assertJson(['message' => 'この操作を実行する権限がありません。']);
+    }
 }
