@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class NotificationController extends Controller
 {
     /**
      * Display a listing of the authenticated user's notifications.
      */
-    public function index()
+    public function index(): View
     {
         $notifications = Auth::user()->notifications;
 
@@ -19,7 +21,7 @@ class NotificationController extends Controller
     /**
      * Mark the specified notification as read.
      */
-    public function read(string $id)
+    public function read(string $id): RedirectResponse
     {
         // notifications()リレーションは notifiable_id で自動的に本人のものに絞られるため、
         // 他人の通知IDを渡されても404になる（＝これが認可の役割を兼ねる）

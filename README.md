@@ -124,40 +124,34 @@ erDiagram
 
 ## 環境構築手順
 
-Laravelに触ったことがない方でも動かせるよう、1ステップずつ詳しく説明します。上から順番に、飛ばさず実行してください。
+以下の手順で動作します。上から順に実行してください。
 
-### 事前準備：Docker Desktopのインストール
+### 事前準備：Docker Desktop
 
-このプロジェクトは「Docker」という、PC上に隔離された実行環境（コンテナ）を作る仕組みの上で動きます。PHPやMySQLを個別にPCへインストールする必要はありません。
-
-1. [Docker Desktop公式サイト](https://www.docker.com/products/docker-desktop/) からご自身のOS（Mac／Windows）に合ったものをダウンロードし、インストールしてください。
-2. インストール後、Docker Desktopアプリを起動してください。画面左下（または該当箇所）のクジラのアイコンが動いていれば起動完了です。
-3. ターミナル（Mac）またはコマンドプロンプト／PowerShell（Windows）を開き、以下を実行してバージョンが表示されればインストール成功です。
+[Docker Desktop公式サイト](https://www.docker.com/products/docker-desktop/)からインストールし、起動してください。
 
 ```bash
 docker --version
 ```
 
-### ステップ1：リポジトリをクローンする
+バージョンが表示されればOKです。
 
-「クローンする」とは、GitHub上にあるプロジェクトのファイル一式を、自分のPCにコピーしてくることです。
+### ステップ1：リポジトリをクローン
 
 ```bash
 git clone git@github.com:sae0715/bookshelf-app.git
 cd bookshelf-app
 ```
 
-`cd bookshelf-app` は「これ以降のコマンドを、このプロジェクトフォルダの中で実行します」という意味です。この後の手順は、すべてこの `bookshelf-app` フォルダの中で行います。
+以降のコマンドはすべて `bookshelf-app` フォルダ内で実行します。
 
-### ステップ2：環境変数ファイル（.env）を準備する
-
-`.env` ファイルには、データベースのパスワードなど「環境ごとに変わる設定」をまとめて書いておきます。テンプレートファイルをコピーして作成します。
+### ステップ2：環境変数（.env）の設定
 
 ```bash
 cp .env.example .env
 ```
 
-作成された `.env` ファイルをテキストエディタ（VSCodeなど）で開き、データベース関連の項目を以下のように設定してください（元から記載がある場合は書き換えてください）。
+`.env`を開き、以下を設定してください（既存の記載があれば上書き）。
 
 ```
 DB_CONNECTION=mysql
@@ -168,17 +162,17 @@ DB_USERNAME=sail
 DB_PASSWORD=password
 ```
 
-また、ISBN検索機能（応用機能）はGoogle Books APIを利用します。`.env`に以下を追加してください。
+ISBN検索機能（応用機能）用に、`.env`に以下のキーも追加してください。
 
-​```
+```
 GOOGLE_BOOKS_API_KEY=
-​```
+```
 
-APIキーが未設定でも1日1,000件まではキー無しで動作しますが、クォータを超過した場合はエラーメッセージの案内に従い、[Google Cloud Console](https://console.cloud.google.com/)でBooks APIを有効化して取得したキーを設定してください。
+※`=`の後ろは空欄でOKです。未設定でも1日1,000件までは動作します。「利用回数の上限に達しました」というエラーが出た場合は、[Google Cloud Console](https://console.cloud.google.com/)で取得したAPIキーを`=`の後ろに追加してください（例: `GOOGLE_BOOKS_API_KEY=AIzaSyABC...`）。
 
-### ステップ3：Composerの依存パッケージをインストールする
+### ステップ3：Composerパッケージのインストール
 
-「Composer」はPHPのライブラリ（他の人が作った便利な部品）を管理するツールです。このプロジェクトが使っているライブラリ一式をダウンロードします。まだ環境自体ができていないので、少し特殊な1行コマンドで実行します。
+`vendor`フォルダがまだ無い状態のため、一時的にComposerコンテナを立てて実行します。
 
 ```bash
 docker run --rm \
@@ -189,93 +183,91 @@ docker run --rm \
   composer install --ignore-platform-reqs
 ```
 
-実行すると、ズラズラとダウンロードのログが流れます。数十秒〜数分かかります。最後に `Generating optimized autoload files` のような表示が出れば完了です。このコマンドの後、プロジェクトフォルダの中に `vendor` という新しいフォルダができているはずです。
+`vendor`フォルダが作成されていれば成功です。
 
-### ステップ4：Laravel Sailを起動する
-
-「Sail」は、このプロジェクトに必要な複数のコンテナ（PHPを動かす箱、MySQLを動かす箱など）をまとめて起動・管理してくれる仕組みです。
+### ステップ4：Sailを起動
 
 ```bash
 ./vendor/bin/sail up -d
 ```
 
-初回は各コンテナのイメージ（設計図）のダウンロードが走るため、数分かかることがあります。`-d` は「バックグラウンドで起動する」という意味で、これを付けるとターミナルの操作がすぐ返ってきます。
+ocker Desktopでコンテナ（`laravel.test`・`mysql`・`phpmyadmin`）が起動中（緑）になっていれば成功です。
 
-以降、コマンドの先頭を `./vendor/bin/sail` の代わりに単に `sail` と打てるようにするため、エイリアス（ショートカット）を登録しておくと便利です（任意ですが推奨します）。
+**エイリアスの設定（任意）**：
+
+以降`sail`コマンドを使う場合は、エイリアスを設定すると便利です。
 
 ```bash
 echo "alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'" >> ~/.zshrc
 exec $SHELL
 ```
 
-（Windowsの場合や `zsh` 以外をお使いの場合は、以降のコマンドの `sail` を `./vendor/bin/sail` に読み替えて実行してください。）
+※このコマンドは実行しても画面に何も表示されません（エラーが無ければ成功です）。設定できたか不安な場合は、以下で確認してください。
 
-**起動確認**：Docker Desktopのアプリを開き、コンテナが3〜4個（`laravel.test`、`mysql`、`phpmyadmin` など）起動中（緑色）になっていればOKです。
+```bash
+sail artisan --version
+```
 
-### ステップ5：アプリケーションキーを生成する
+Laravelのバージョンが表示されれば成功です。
+`command not found: sail` と出た場合は、以降のコマンドの`sail`を`./vendor/bin/sail`に読み替えて実行してください。
 
-Laravelがデータの暗号化などに使う秘密鍵を生成します。
+（`zsh`以外の場合はこのエイリアス設定自体が効かないため、同様に`./vendor/bin/sail`を使ってください。WindowsでWSLを使っている場合は、WSL上のシェルの種類によります）
+
+### ステップ5：アプリケーションキーの生成
 
 ```bash
 sail artisan key:generate
 ```
 
-`.env` ファイルの `APP_KEY=` の後ろに文字列が入っていれば成功です。
-
-### ステップ6：フロントエンドの依存パッケージを復元する
-
-`package.json`（必要なパッケージの一覧が書かれたファイル）と `tailwind.config.js`（デザイン設定ファイル）はリポジトリに含まれているため、新規作成の必要はありません。以下のコマンドで、記載されているパッケージ一式をまとめて復元します。
+### ステップ6：フロントエンド依存パッケージの復元
 
 ```bash
 sail npm install
 ```
 
-数十秒〜1分程度かかります。エラーが出ずに元のコマンド入力状態（プロンプト）に戻れば成功です。この時点で `node_modules` フォルダが作成されます。
+`node_modules`フォルダが作成されていれば成功です。
+`vulnerabilities`（脆弱性）の件数表示や、npmの新バージョン案内が出ることがありますが、いずれもエラーではないため無視して問題ありません。
+`npm ERR!`という文字列が出ていなければ正常に完了しています。
 
-### ステップ7：データベースを作成する（マイグレーション・シーディング）
-
-「マイグレーション」はデータベースにテーブル（表）を作る作業、「シーディング」はそのテーブルにテスト用のサンプルデータを入れる作業です。以下の1コマンドでまとめて実行します。
+### ステップ7：DBのマイグレーション・シーディング
 
 ```bash
 sail artisan migrate:fresh --seed
 ```
 
-テーブル名が並んだログが表示され、エラーなく終われば成功です。この時点で、書籍・ジャンル・レビューなどのサンプルデータが入った状態になります。
+すべてのマイグレーション・Seederの行に`DONE`と表示されていれば成功です。`Seeding database.`の下に`ReadingPlanSeeder`まで含めて全7個のSeederが並んでいるか確認してください。
 
-### ステップ8：Viteを起動する（開発サーバー）
-
-さきほど準備したTailwind CSSなどを、実際に画面へ反映させ続けるためのコマンドです。**このコマンドは実行したまま、ターミナルを閉じずに待機させておく必要があります。**
+### ステップ8：Viteの起動
 
 ```bash
 sail npm run dev
 ```
 
-`VITE ready` のような表示が出て、コマンド入力が返ってこない状態（動きっぱなしの状態）になれば成功です。以降、別の作業をする場合は**新しいターミナルのタブ／ウィンドウ**を開いて行ってください。
+このコマンドは実行したまま待機させてください。別作業は新しいターミナルで行ってください。
 
 ### ステップ9：動作確認
 
-ブラウザで以下のURLを開いてください。
+- Webアプリ: http://localhost
+- phpMyAdmin: http://localhost:8080 （ユーザー名 `sail` / パスワード `password`）
 
-- Webアプリ: [http://localhost](http://localhost)
-- phpMyAdmin（データベース確認用）: [http://localhost:8080](http://localhost:8080)（ユーザー名 `sail` / パスワード `password`）
-
-書籍一覧画面が表示されれば、環境構築は完了です。
+書籍一覧が表示されれば完了です。
 
 ### うまく表示されないときは
 
-- **画面のデザインが崩れている（無装飾のまま）**：ステップ8の `sail npm run dev` が起動したままになっているか確認してください。
-- **真っ白な画面になる**：`sail artisan route:clear` と `sail artisan config:clear` を実行してから再度アクセスしてみてください。
-- **データベース関連のエラーが出る**：`.env` のDB設定（ステップ2）が正しいか、`sail artisan migrate:fresh --seed`（ステップ7）が正常に完了しているか確認してください。
+- **画面が崩れている**：`sail npm run dev`が起動しているか確認
+- **真っ白な画面**：`sail artisan route:clear` と `sail artisan config:clear` を実行
+- **DB関連のエラー**：`.env`のDB設定と`sail artisan migrate:fresh --seed`が正常に完了しているか確認
 
 ## 開発環境URL
 
 - Webアプリ: http://localhost
 - phpMyAdmin: http://localhost:8080
 - 公開API: http://localhost/api/v1
+（※ブラウザで直接開いても404になります。個別のエンドポイントは下記「APIエンドポイント一覧」を参照してください。例: http://localhost/api/v1/books ）
 
 ## テスト用アカウント
 
-シーディングにより、以下のテストユーザーが作成されます（パスワード共通: `password`）。
+シーディングにより、以下のテストユーザーが作成されます。
 
 | メールアドレス | 名前 |
 |---|---|
@@ -285,17 +277,19 @@ sail npm run dev
 | sato@example.com | 佐藤美咲 |
 | takahashi@example.com | 高橋健太 |
 
+パスワード共通: `password`
+
 会員登録画面から新規にアカウントを作成することも可能です。
 
 ## APIエンドポイント一覧
 
-| メソッド | パス | 概要 | 認証 |
-|---|---|---|---|
-| GET | /api/v1/books | 書籍一覧取得（キーワード検索・ジャンル絞り込み・ページネーション対応） | 不要 |
-| GET | /api/v1/books/{id} | 書籍詳細取得（ジャンル・レビュー情報を含む） | 不要 |
-| POST | /api/v1/books | 書籍新規登録 | 必須（Sanctum） |
-| PUT | /api/v1/books/{id} | 書籍更新（本人以外は403） | 必須（Sanctum） |
-| DELETE | /api/v1/books/{id} | 書籍削除（本人以外は403） | 必須（Sanctum） |
+| メソッド | パス | 概要 | 認証 | 成功時 | 主なエラー |
+|---|---|---|---|---|---|
+| GET | /api/v1/books | 書籍一覧取得（キーワード検索・ジャンル絞り込み・ページネーション対応、20件/ページ） | 不要 | 200 | - |
+| GET | /api/v1/books/{id} | 書籍詳細取得（ジャンル・レビュー情報を含む） | 不要 | 200 | 404（未存在） |
+| POST | /api/v1/books | 書籍新規登録 | 必須（Sanctum） | 201 | 422（バリデーションエラー） |
+| PUT | /api/v1/books/{id} | 書籍更新（本人以外は403） | 必須（Sanctum） | 200 | 404（未存在）／403（本人以外） |
+| DELETE | /api/v1/books/{id} | 書籍削除（本人以外は403） | 必須（Sanctum） | 204 | 404（未存在）／403（本人以外） |
 
 ## 読書計画の日次バッチ
 

@@ -18,12 +18,12 @@ class ReadingPlanReminder extends Notification
     /**
      * @return array<int, string>
      */
-    public function via($notifiable): array
+    public function via(mixed $notifiable): array
     {
         return ['database'];
     }
 
-    public function toDatabase($notifiable): array
+    public function toDatabase(mixed $notifiable): array
     {
         return [
             'reading_plan_id' => $this->plan->id,

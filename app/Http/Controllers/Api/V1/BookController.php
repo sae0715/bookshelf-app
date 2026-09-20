@@ -7,11 +7,13 @@ use App\Http\Requests\Api\V1\BookStoreRequest;
 use App\Http\Requests\BookRequest;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class BookController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): AnonymousResourceCollection
     {
         $query = Book::with('genres')->withCount('reviews')->withAvg('reviews', 'rating');
 
@@ -30,7 +32,7 @@ class BookController extends Controller
         return BookResource::collection($query->paginate(20));
     }
 
-    public function show(Book $book)
+    public function show(Book $book): BookResource
     {
         $book->load(['genres', 'reviews.user']);
         $book->loadCount('reviews');
@@ -39,7 +41,7 @@ class BookController extends Controller
         return new BookResource($book);
     }
 
-    public function store(BookStoreRequest $request)
+    public function store(BookStoreRequest $request): BookResource
     {
         $validated = $request->validated();
 
@@ -58,7 +60,7 @@ class BookController extends Controller
         return new BookResource($book);
     }
 
-    public function update(BookRequest $request, Book $book)
+    public function update(BookRequest $request, Book $book): BookResource
     {
         $this->authorize('update', $book);
 
@@ -72,7 +74,7 @@ class BookController extends Controller
         return new BookResource($book);
     }
 
-    public function destroy(Book $book)
+    public function destroy(Book $book): JsonResponse
     {
         $this->authorize('delete', $book);
 

@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Review;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class ReportController extends Controller
 {
     /**
      * Display the authenticated user's reading report.
      */
-    public function index()
+    public function index(): View
     {
         $userId = Auth::id();
 
@@ -44,7 +46,7 @@ class ReportController extends Controller
     /**
      * 評価分布：1〜5星ごとの件数（インデックス0が★1件数、4が★5件数）。
      */
-    private function buildRatingDistribution(int $userId)
+    private function buildRatingDistribution(int $userId): Collection
     {
         $counts = Review::where('user_id', $userId)
             ->select('rating', DB::raw('COUNT(*) as count'))
@@ -57,7 +59,7 @@ class ReportController extends Controller
     /**
      * 高評価書籍TOP5：4星以上の書籍を評価の高い順に最大5件（同一書籍は最高評価でまとめる）。
      */
-    private function buildTopRatedBooks(int $userId)
+    private function buildTopRatedBooks(int $userId): Collection
     {
         $topRatings = Review::where('user_id', $userId)
             ->where('rating', '>=', 4)
@@ -81,7 +83,7 @@ class ReportController extends Controller
      * ジャンル別評価傾向TOP5：ジャンルごとの平均評価と件数を高い順に最大5件。
      * 1レビューが複数ジャンルに紐づく書籍のレビューの場合、各ジャンルの集計にそれぞれ加算される。
      */
-    private function buildGenreRatings(int $userId)
+    private function buildGenreRatings(int $userId): Collection
     {
         return DB::table('reviews')
             ->join('books', 'books.id', '=', 'reviews.book_id')

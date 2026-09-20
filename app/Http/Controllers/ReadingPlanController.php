@@ -6,15 +6,17 @@ use App\Enums\ReadingPlanStatus;
 use App\Http\Requests\ReadingPlanRequest;
 use App\Models\Book;
 use App\Models\ReadingPlan;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class ReadingPlanController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * 読書計画の一覧を表示する。
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $currentStatus = $request->input('status');
 
@@ -30,9 +32,9 @@ class ReadingPlanController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * 新規作成フォームを表示する。
      */
-    public function create()
+    public function create(): View
     {
         $books = Book::orderBy('title')->get();
 
@@ -40,9 +42,9 @@ class ReadingPlanController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * 新規作成した読書計画を保存する。
      */
-    public function store(ReadingPlanRequest $request)
+    public function store(ReadingPlanRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -57,9 +59,9 @@ class ReadingPlanController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * 指定した読書計画の編集フォームを表示する。
      */
-    public function edit(ReadingPlan $readingPlan)
+    public function edit(ReadingPlan $readingPlan): View
     {
         $this->authorize('update', $readingPlan);
 
@@ -67,9 +69,9 @@ class ReadingPlanController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * 指定した読書計画を更新する。
      */
-    public function update(ReadingPlanRequest $request, ReadingPlan $readingPlan)
+    public function update(ReadingPlanRequest $request, ReadingPlan $readingPlan): RedirectResponse
     {
         $this->authorize('update', $readingPlan);
 
@@ -88,9 +90,9 @@ class ReadingPlanController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * 指定した読書計画を削除する。
      */
-    public function destroy(ReadingPlan $readingPlan)
+    public function destroy(ReadingPlan $readingPlan): RedirectResponse
     {
         $this->authorize('delete', $readingPlan);
 
@@ -100,9 +102,9 @@ class ReadingPlanController extends Controller
     }
 
     /**
-     * Mark the specified reading plan as completed.
+     * 指定した読書計画を読了（完了）にする。
      */
-    public function complete(ReadingPlan $readingPlan)
+    public function complete(ReadingPlan $readingPlan): RedirectResponse
     {
         $this->authorize('update', $readingPlan);
 
@@ -115,9 +117,9 @@ class ReadingPlanController extends Controller
     }
 
     /**
-     * Revert the specified reading plan from completed back to in-progress.
+     * 指定した読書計画の読了を取り消し、進行中に戻す。
      */
-    public function uncomplete(ReadingPlan $readingPlan)
+    public function uncomplete(ReadingPlan $readingPlan): RedirectResponse
     {
         $this->authorize('uncomplete', $readingPlan);
 
