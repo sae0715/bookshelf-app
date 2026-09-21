@@ -168,7 +168,15 @@ ISBN検索機能（応用機能）用に、`.env`に以下のキーも追加し�
 GOOGLE_BOOKS_API_KEY=
 ```
 
-※`=`の後ろは空欄でOKです。未設定でも1日1,000件までは動作します。「利用回数の上限に達しました」というエラーが出た場合は、[Google Cloud Console](https://console.cloud.google.com/)で取得したAPIキーを`=`の後ろに追加してください（例: `GOOGLE_BOOKS_API_KEY=AIzaSyABC...`）。
+※このキーが空のままだと、Google Books API側の利用制限により正常に動作しない場合があります。[Google Cloud Console](https://console.cloud.google.com/)でBooks APIを有効化し、ご自身のAPIキーを取得の上、上記の`GOOGLE_BOOKS_API_KEY=`の後ろに貼り付けてください。（無料・5分程度で取得可能です）
+
+**APIキー取得手順**：
+1. [Google Cloud Console](https://console.cloud.google.com/)にアクセスし、Googleアカウントでログイン
+2. 新しいプロジェクトを作成（名前は任意）
+3. 「APIとサービス」→「ライブラリ」から「Books API」を検索し、有効化
+4. 「APIとサービス」→「認証情報」→「認証情報を作成」→「APIキー」でキーを発行
+5. 発行されたキー（`AIzaSy...`で始まる文字列）を`.env`に貼り付け
+
 
 ### ステップ3：Composerパッケージのインストール
 
@@ -257,6 +265,13 @@ sail npm run dev
 - **画面が崩れている**：`sail npm run dev`が起動しているか確認
 - **真っ白な画面**：`sail artisan route:clear` と `sail artisan config:clear` を実行
 - **DB関連のエラー**：`.env`のDB設定と`sail artisan migrate:fresh --seed`が正常に完了しているか確認
+- **phpMyAdminで「Access denied for user 'root'」と表示される**：`sail up -d`（ステップ4）を実行した後に`.env`のDB設定を変更した場合に起こります。
+コンテナが古い設定を読み込んだままになっているため、以下を実行して再起動してください。
+
+```bash
+sail down
+sail up -d
+```
 
 ## 開発環境URL
 
